@@ -600,6 +600,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "dbt-duckdb" },
     { name = "pre-commit" },
     { name = "sqlfluff" },
 ]
@@ -609,6 +610,7 @@ requires-dist = [{ name = "dbt-duckdb", specifier = ">=1.7.0" }]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "dbt-duckdb", specifier = ">=1.10.0" },
     { name = "pre-commit", specifier = ">=4.5.1" },
     { name = "sqlfluff", specifier = ">=3.0.0" },
 ]

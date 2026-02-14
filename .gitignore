@@ -1,7 +1,18 @@
 config.yml
 
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
 # dont show raw data and database files
-data/database
-data/raw/strava
-data/raw/whoop
+0_data/database/
+0_data/raw/strava/
+0_data/raw/whoop/

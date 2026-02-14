@@ -9,6 +9,7 @@ dependencies = [
 
 [tool.uv]
 dev-dependencies = [
+    "dbt-duckdb>=1.10.0",
     "pre-commit>=4.5.1",
     "sqlfluff>=3.0.0",
 ]
