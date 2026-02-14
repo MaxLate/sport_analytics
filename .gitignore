@@ -1,0 +1,4 @@
+# dont show raw data and database files
+data/database
+data/raw/strava
+data/raw/whoop

@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.10.0  # Nutze die neueste Version
+    hooks:
+      - id: black
+        language_version: python3.12  # Passe an deine Python-Version an
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 3.2.5  # Nutze die neueste Version
+    hooks:
+      - id: sqlfluff-lint
+        # Optional: zusätzliche Argumente
+        # args: [--dialect, postgres]
+      - id: sqlfluff-fix
+        # Auto-fix für SQL-Dateien (optional)
+        # args: [--dialect, postgres]
