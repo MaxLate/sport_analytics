@@ -1,0 +1,40 @@
+sources:
+
+  - name: mooncalender
+    description: Data of the moon phases and illumination of each day in Germany.
+    database: source
+    schema: seeds
+
+  - name: activity_mapping
+    description: Mapping of activity names from different sources to a unified activity name.
+    database: source
+    schema: seeds
+
+tables:
+    - name: mooncalender
+      description: Data of the moon phases and illumination of each day in Germany.
+
+    - name: activity_mapping
+      description: Mapping of activity names from different sources to a unified activity name.
+
+models:
+  - name: stg_dbt_seeds_activity_mapping
+    description: |
+      Staging model for activity mapping seed data. This model standardizes activity names 
+      from different sources (Strava, Whoop) to a unified naming convention and identifies 
+      which activities are considered sport/exercise activities.
+    columns:
+      - name: activity_name
+        description: Original activity name from the source system (Strava or Whoop).
+        data_tests:
+          - not_null
+
+      - name: aligned_activity_name
+        description: Unified activity name that aligns activities across different sources to a common naming convention.
+        data_tests:
+          - not_null
+
+      - name: is_sport_exercise
+        description: Boolean flag indicating whether the activity is considered a sport/exercise activity (true) or a non-exercise activity like commuting, sauna, etc. (false).
+        data_tests:
+          - not_null

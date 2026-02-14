@@ -1,0 +1,63 @@
+models:
+  - name: fct_strava_activities
+    description: |
+      Fact table containing core performance and physical metrics for Strava activities. 
+      This is the primary table for analyzing athletic performance data.
+      
+      **Contains:**
+      - **Activity identifiers**: strava_activity_id, strava_activity_id_of_day, date_day for temporal analysis
+      - **Distance metrics**: Total distance covered in meters and kilometers
+      - **Time metrics**: Moving time and elapsed time in seconds, minutes, and hours (moving time excludes pauses, elapsed time includes all pauses)
+      - **Elevation metrics**: Total elevation gain in meters
+      - **Speed metrics**: Average and maximum speed in both meters per second and kilometers per hour
+      - **Location data**: Start and end coordinates (latitude/longitude) for route analysis
+      - **Health/Performance metrics**: 
+        - Heart rate data (average and maximum heart rate in beats per minute)
+        - Power metrics (average watts and total kilojoules for power-based activities)
+        - Cadence (average cadence in revolutions per minute, typically for cycling activities)
+      
+      **Use this table when you need:**
+      - Performance analysis (speed, distance, time)
+      - Training load calculations
+      - Heart rate zone analysis
+      - Power-based training metrics
+      - Route and location-based queries
+      - Elevation gain analysis
+      - Calculating averages, totals, or trends over time
+      
+      **Source**: Based on Strava API v3 DetailedActivity response. Data originates from GPS devices, fitness trackers, and manual entries uploaded to Strava.
+      **Reference**: https://developers.strava.com/docs/reference/#api-Activities
+    materialized: table
+
+  - name: fct_strava_activities_socials
+    description: |
+      Fact table containing social engagement metrics and activity metadata/settings for Strava activities.
+      This table focuses on the social aspects and characteristics of activities rather than physical performance.
+      
+      **Contains:**
+      - **Activity identifiers**: strava_activity_id, strava_activity_id_of_day, date_day (shared with fct_strava_activities for joins)
+      - **Social engagement metrics**:
+        - achievement_count: Number of achievements earned (e.g., personal records, segment achievements)
+        - kudos_count: Number of kudos (likes) received from other athletes
+        - comment_count: Number of comments on the activity
+        - athlete_count: Number of athletes who participated in the activity (for group activities)
+      - **Activity settings and metadata**:
+        - trainer: Boolean flag indicating if activity was performed on a trainer/indoor equipment
+        - commute: Boolean flag indicating if activity was marked as a commute
+        - manual: Boolean flag indicating if activity was manually created (not uploaded from device)
+        - private: Boolean flag indicating if activity visibility is set to private
+        - flagged: Boolean flag indicating if activity has been flagged for review
+        - gear_id: Identifier linking to the gear/equipment used (e.g., bike ID, shoe ID)
+      
+      **Use this table when you need:**
+      - Social engagement analysis (kudos, comments, achievements)
+      - Activity categorization (commute vs. training, indoor vs. outdoor)
+      - Filtering activities by characteristics (trainer activities, manual entries, private activities)
+      - Gear/equipment usage tracking
+      - Community engagement metrics
+      - Group activity analysis
+      
+      **Note**: This table references fct_strava_activities and can be joined using activity_id for combined analysis of performance and social metrics.
+      **Source**: Based on Strava API v3 DetailedActivity response. Social metrics reflect community interactions on the Strava platform.
+      **Reference**: https://developers.strava.com/docs/reference/#api-Activities
+    materialized: table

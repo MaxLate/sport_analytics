@@ -1,0 +1,179 @@
+models:
+  - name: int_strava_activities
+    description: Intermediate and enhanced table for Strava activities data.
+    materialized: table
+    columns:
+      - name: strava_activity_id_internal
+        description: Unique identifier for the activity in the internal Strava system.
+        tests:
+          - unique
+          - not_null
+
+      - name: strava_activity_id
+        description: Unique identifier for the activity and row number of the activity in the table.
+        tests:
+          - unique
+          - not_null
+
+      - name: strava_activity_id_of_day
+        description: Unique identifier for the activity within the day.
+        tests:
+          - not_null
+
+      - name: date_day
+        description: '{{ doc("date_day") }}'
+        tests:
+          - not_null
+
+      - name: distance_meters
+        description: Total distance of the activity in meters.
+        tests:
+          - not_null
+
+      - name: distance_kilometers
+        description: Total distance of the activity in kilometers.
+        tests:
+          - not_null
+
+      - name: moving_time_seconds
+        description: Total moving time of the activity in seconds.
+        tests:
+          - not_null
+
+      - name: moving_time_minutes
+        description: Total moving time of the activity in minutes.
+        tests:
+          - not_null
+
+      - name: moving_time_hours
+        description: Total moving time of the activity in hours.
+        tests:
+          - not_null
+
+      - name: elapsed_time_seconds
+        description: Total elapsed time of the activity in seconds.
+        tests:
+          - not_null
+
+      - name: elapsed_time_minutes
+        description: Total elapsed time of the activity in minutes.
+        tests:
+          - not_null
+
+      - name: elapsed_time_hours
+        description: Total elapsed time of the activity in hours.
+        tests:
+          - not_null
+
+      - name: total_elevation_gain_meters
+        description: Total elevation gain of the activity in meters.
+        tests:
+          - not_null
+
+      - name: average_speed_meters_per_second
+        description: Average speed of the activity in meters per second.
+        tests:
+          - not_null
+
+      - name: average_speed_kilometers_per_hour
+        description: Average speed of the activity in kilometers per hour.
+        tests:
+          - not_null
+
+      - name: max_speed_meters_per_second
+        description: Maximum speed of the activity in meters per second.
+        tests:
+          - not_null
+
+      - name: max_speed_kilometers_per_hour
+        description: Maximum speed of the activity in kilometers per hour.
+        tests:
+          - not_null
+
+      - name: name
+        description: Name of the activity as set by the athlete.
+
+      - name: type
+        description: Legacy activity type classification (e.g. Run, Ride).
+
+      - name: start_date
+        description: Activity start datetime in UTC.
+        tests:
+          - not_null
+
+      - name: start_date_local
+        description: Activity start datetime in the athlete's local timezone.
+        tests:
+          - not_null
+
+      - name: timezone
+        description: Human-readable timezone string associated with the activity.
+
+      - name: start_latitude
+        description: Latitude component of the activity start location.
+
+      - name: start_longitude
+        description: Longitude component of the activity start location.
+
+      - name: end_latitude
+        description: Latitude component of the activity end location.
+
+      - name: end_longitude
+        description: Longitude component of the activity end location.
+
+      - name: average_heartrate
+        description: Average heart rate over the activity when heart rate data is available.
+
+      - name: max_heartrate
+        description: Maximum heart rate recorded during the activity when heart rate data is available.
+
+      - name: average_watts
+        description: Average power output for the activity.
+
+      - name: kilojoules
+        description: Total work performed during the activity for power-enabled activities.
+
+      - name: average_cadence
+        description: Average cadence over the activity (typically for cycling).
+
+      - name: achievement_count
+        description: Number of achievements (e.g. PRs, segment results) associated with the activity.
+
+      - name: kudos_count
+        description: Number of kudos the activity has received from other athletes.
+
+      - name: comment_count
+        description: Number of comments on the activity.
+
+      - name: athlete_count
+        description: Number of athletes participating in the activity (for group activities).
+
+      - name: trainer
+        description: Flag indicating whether the activity was performed on a trainer.
+
+      - name: commute
+        description: Flag indicating whether the activity is marked as a commute.
+
+      - name: manual
+        description: Flag indicating whether the activity was manually created instead of uploaded from a device.
+
+      - name: private
+        description: Flag indicating whether the activity's visibility is private.
+
+      - name: flagged
+        description: Flag indicating whether the activity has been flagged for review or issues.
+
+      - name: gear_id
+        description: Identifier of the gear used for the activity.
+
+      - name: extracted_at
+        description: Timestamp when this activity record was extracted from the Strava API by the ingestion pipeline.
+        tests:
+          - not_null
+
+      - name: activity_name
+        description: Unified activity name from the activity mapping, aligned across different data sources.
+
+      - name: is_sport_exercise
+        description: Boolean flag indicating whether the activity is considered a sport/exercise activity.
+      

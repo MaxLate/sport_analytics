@@ -1,0 +1,190 @@
+models:
+  - name: fct_activities
+    description: |
+      Semantic layer fact table providing a simplified, curated view of Strava activities optimized for analytical queries and LLM context.
+      
+      This model serves as a lightweight abstraction layer that extracts the most essential activity information from the comprehensive `fct_strava_activities` table. It focuses on core identifiers, temporal dimensions, and basic activity classification to enable quick lookups, filtering, and high-level analysis without the overhead of detailed performance metrics.
+      
+      **Purpose & Use Cases:**
+      - **Activity identification and lookup**: Quickly find activities by ID, date, or name
+      - **Temporal analysis**: Analyze activity patterns by day, count activities per day, or filter by date ranges
+      - **Activity classification**: Group and filter activities by sport type (e.g., Run, Ride, Swim, Hike)
+      - **Daily activity tracking**: Identify which activity was performed on a specific day using `strava_activity_id_of_day`
+      - **LLM query context**: Provides structured, well-documented data for natural language queries about activities
+      - **Lightweight joins**: Use as a bridge table for joining with other fact tables or dimensions
+      
+      **Key Characteristics:**
+      - **Simplified schema**: Contains only 5 essential columns for maximum query efficiency
+      - **Temporal indexing**: Includes both sequential activity ID and day-specific activity ID for flexible temporal queries
+      - **Activity metadata**: Preserves activity name and sport type for human-readable queries
+      - **Semantic layer**: Designed as an abstraction over the detailed performance metrics in `fct_strava_activities`
+      
+      **Relationship to Other Tables:**
+      - **Source**: Aggregates data from `fct_strava_activities` (which contains detailed performance metrics)
+      - **Join key**: Use `strava_activity_id` to join with other fact tables (e.g., `fct_strava_activities_socials`) or dimension tables
+      - **Temporal joins**: Use `date_day` to join with date dimension tables or other time-series data
+      
+      **Query Examples:**
+      - "How many activities did I do per day?" → Group by `date_day`, count `strava_activity_id`
+      - "What activities did I do on a specific date?" → Filter by `date_day`, select `name` and `sport_type`
+      - "What was my first activity of the day?" → Filter by `strava_activity_id_of_day = 1`
+      - "List all my running activities" → Filter by `sport_type = 'Run'`
+      
+      **Data Quality Notes:**
+      - All activities have a unique `strava_activity_id` (sequential across all activities)
+      - `strava_activity_id_of_day` resets to 1 for each new day (first activity of the day = 1, second = 2, etc.)
+      - `date_day` is truncated to midnight (date only, no time component)
+      - `sport_type` values are standardized (e.g., "Run", "Ride", "Swim", "Hike", "Walk", etc.)
+      - Activity names are user-defined and may vary in format
+      
+      **Source**: Derived from `fct_strava_activities`, which is based on Strava API v3 DetailedActivity response.
+      **Reference**: https://developers.strava.com/docs/reference/#api-Activities
+    materialized: table
+    columns:
+      - name: strava_activity_id
+        description: |
+          Unique sequential identifier for each Strava activity across the entire dataset.
+          
+          This is a row number assigned to activities ordered by their start date/time, making it useful for:
+          - Identifying the chronological order of activities
+          - Joining with other fact tables that reference the same activity
+          - Creating sequential analysis (e.g., "my 100th activity")
+          - Primary key for this table
+          
+          **Characteristics:**
+          - Starts at 1 and increments sequentially
+          - Never resets (unlike `strava_activity_id_of_day`)
+          - Unique across all activities
+          - Can be used as a foreign key to join with `fct_strava_activities` and other related tables
+          
+          **Example values**: 1, 2, 3, ..., 150, 151
+        data_type: bigint
+        tests:
+          - unique
+          - not_null
+
+      - name: strava_activity_id_of_day
+        description: |
+          Sequential identifier for activities within a single day, resetting to 1 for each new day.
+          
+          This identifier answers the question: "Which activity number was this on that specific day?"
+          Useful for:
+          - Finding the first, second, third activity of a day
+          - Analyzing daily activity patterns (e.g., "How often do I do multiple activities per day?")
+          - Filtering for specific activity positions within a day
+          - Understanding activity sequencing on a daily basis
+          
+          **Characteristics:**
+          - Resets to 1 for each new `date_day`
+          - Increments within the same day (1 = first activity, 2 = second activity, etc.)
+          - Not unique across different days (multiple days can have activity_id_of_day = 1)
+          - Always >= 1 (at least one activity per day that has activities)
+          
+          **Example values**: 1 (first activity of the day), 2 (second activity), 3 (third activity)
+          
+          **Use case**: "What was my first activity on 2024-01-15?" → Filter by `date_day = '2024-01-15' AND strava_activity_id_of_day = 1`
+        data_type: bigint
+        tests:
+          - not_null
+
+      - name: date_day
+        description: |
+          Date dimension representing the calendar day when the activity started, truncated to midnight (date only, no time component).
+          
+          This is the primary temporal dimension for grouping and filtering activities by day.
+          Useful for:
+          - Daily activity counts and aggregations
+          - Time-series analysis (trends over days, weeks, months)
+          - Filtering activities within date ranges
+          - Joining with date dimension tables for calendar-based analysis
+          - Weekly/monthly/yearly aggregations
+          
+          **Characteristics:**
+          - Date data type (YYYY-MM-DD format)
+          - Truncated from the activity's `start_date` timestamp
+          - Represents the calendar day, not necessarily the day the activity was uploaded
+          - Timezone-aware (based on activity's local timezone)
+          
+          **Example values**: '2024-01-15', '2024-01-16', '2024-12-31'
+          
+          **Use cases**:
+          - "How many activities per day in January 2024?" → Group by `date_day` where `date_day >= '2024-01-01' AND date_day < '2024-02-01'`
+          - "Activities in the last 30 days" → Filter by `date_day >= CURRENT_DATE - 30`
+        data_type: date
+        tests:
+          - not_null
+
+      - name: name
+        description: |
+          User-defined name or title of the Strava activity, as entered by the athlete.
+          
+          This is the human-readable activity name that appears in the Strava app and website.
+          Useful for:
+          - Searching for specific activities by name
+          - Displaying activity names in reports and dashboards
+          - Understanding activity context and purpose
+          - Text-based filtering and pattern matching
+          
+          **Characteristics:**
+          - Free-form text field (varchar)
+          - User-defined, so format and content vary widely
+          - May include emojis, special characters, or multiple languages
+          - Can be empty or null (though rare in practice)
+          - Examples: "Morning Run", "Long Bike Ride", "🏃‍♂️ 5K Training", "Commute to Work"
+          
+          **Common patterns:**
+          - Descriptive names: "Morning Run", "Evening Ride"
+          - Training-specific: "5K Training", "Interval Workout"
+          - Location-based: "Central Park Loop", "Beach Run"
+          - Commute indicators: "Commute", "To Work", "From Home"
+          
+          **Note**: For programmatic filtering, consider using `sport_type` instead of parsing activity names, as names are unstructured.
+        data_type: varchar
+        tests:
+          - not_null
+
+      - name: sport_type
+        description: |
+          Standardized classification of the activity type/sport category from Strava.
+          
+          This is the primary dimension for categorizing and filtering activities by sport.
+          Essential for:
+          - Grouping activities by sport type (e.g., all runs, all rides)
+          - Sport-specific analysis and reporting
+          - Filtering activities for specific sports
+          - Calculating sport-specific metrics and trends
+          - Understanding activity distribution across different sports
+          
+          **Common Values:**
+          - **Run**: Running activities (road running, trail running, track running)
+          - **Ride**: Cycling activities (road cycling, mountain biking, indoor cycling)
+          - **Swim**: Swimming activities (pool swimming, open water swimming)
+          - **Walk**: Walking activities
+          - **Hike**: Hiking activities
+          - **Workout**: Generic workout activities
+          - **VirtualRide**: Virtual cycling (e.g., Zwift, TrainerRoad)
+          - **VirtualRun**: Virtual running activities
+          - **EBikeRide**: E-bike activities
+          - **Yoga**: Yoga sessions
+          - **WeightTraining**: Weight lifting and strength training
+          - **Crossfit**: CrossFit workouts
+          - And many more sport-specific types
+          
+          **Characteristics:**
+          - Standardized values from Strava API (not user-defined)
+          - Case-sensitive (typically PascalCase)
+          - Consistent across all activities
+          - Useful for reliable filtering and grouping
+          
+          **Example values**: 'Run', 'Ride', 'Swim', 'Hike', 'Walk', 'VirtualRide'
+          
+          **Use cases**:
+          - "How many runs did I do this month?" → Filter by `sport_type = 'Run'` and count
+          - "List all my cycling activities" → Filter by `sport_type = 'Ride'`
+          - "Activity distribution by sport" → Group by `sport_type` and count
+        data_type: varchar
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Run', 'Ride', 'Swim', 'Walk', 'Hike', 'Workout', 'VirtualRide', 'VirtualRun', 'EBikeRide', 'Yoga', 'WeightTraining', 'Crossfit']
+

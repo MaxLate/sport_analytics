@@ -1,0 +1,274 @@
+models:
+  - name: fct_whoop_sleeps
+    description: |
+      Fact table containing sleep duration and stage metrics for WHOOP sleep events. 
+      This table focuses on the quantitative aspects of sleep - how long you slept and in which stages.
+      
+      **Contains:**
+      - **Sleep identifiers**: sleep_id, sleep_id_of_day, date_day for temporal analysis
+      - **Sleep timing**: sleep_start_date, sleep_onset (when actual sleep began), wake_up_date, wake_onset (final awakening), cycle_timezone
+      - **Sleep duration metrics** (available in both minutes and hours):
+        - asleep_duration_minutes/hours: Total time spent actually asleep
+        - in_bed_duration_minutes/hours: Total time spent in bed (includes awake time)
+        - light_sleep_duration_minutes/hours: Duration of light sleep stage
+        - deep_sleep_duration_minutes/hours: Duration of deep sleep stage (slow-wave sleep)
+        - rem_duration_minutes/hours: Duration of REM (Rapid Eye Movement) sleep stage
+        - awake_duration_minutes/hours: Duration of awake time during the sleep period
+      - **Moon data**:
+        - moon_phase: Moon phase name for the sleep date
+        - moon_phase_cycle: Moon phase cycle information
+        - moon_illumination: Moon illumination percentage
+      
+      **Use this table when you need:**
+      - Sleep duration analysis (total sleep time, time in bed)
+      - Sleep stage breakdown (light, deep, REM sleep percentages)
+      - Sleep efficiency calculations (asleep vs. in bed time)
+      - Sleep pattern analysis over time
+      - Comparing sleep stages across different nights
+      - Calculating sleep debt or sleep duration trends
+      
+      **Note**: This table can be joined with fct_whoop_sleep_quality using sleep_id to combine duration and quality metrics.
+      **Source**: Based on WHOOP Sleep API data. Sleep stages are detected using WHOOP's proprietary algorithms analyzing heart rate variability and movement.
+      **Reference**: https://developer.whoop.com/docs/developing/user-data/sleep
+    materialized: table
+    columns:
+      - name: sleep_id
+        description: Unique identifier for the sleep event.
+
+      - name: sleep_id_of_day
+        description: Unique identifier for the sleep event within the day.
+
+      - name: date_day
+        description: Date of the night.
+
+      - name: sleep_start_date
+        description: Date of the sleep start.
+
+      - name: sleep_onset
+        description: Time when actual sleep began.
+
+      - name: wake_up_date
+        description: Date of the wake up.
+
+      - name: wake_onset
+        description: Time of final awakening.
+
+      - name: asleep_duration_minutes
+        description: Total minutes spent asleep.
+
+      - name: asleep_duration_hours
+        description: Total hours spent asleep (calculated from minutes).
+
+      - name: in_bed_duration_minutes
+        description: Total minutes spent in bed.
+
+      - name: in_bed_duration_hours
+        description: Total hours spent in bed (calculated from minutes).
+
+      - name: light_sleep_duration_minutes
+        description: Duration of light sleep in minutes.
+
+      - name: light_sleep_duration_hours
+        description: Duration of light sleep in hours (calculated from minutes).
+
+      - name: deep_sleep_duration_minutes
+        description: Duration of deep sleep in minutes.
+
+      - name: deep_sleep_duration_hours
+        description: Duration of deep sleep in hours (calculated from minutes).
+
+      - name: rem_duration_minutes
+        description: Duration of REM sleep in minutes.
+
+      - name: rem_duration_hours
+        description: Duration of REM sleep in hours (calculated from minutes).
+
+      - name: awake_duration_minutes
+        description: Duration of awake time in minutes.
+
+      - name: awake_duration_hours
+        description: Duration of awake time in hours (calculated from minutes).
+
+      - name: moon_phase
+        description: Moon phase name for the sleep date.
+
+      - name: moon_phase_cycle
+        description: Moon phase cycle information.
+
+      - name: moon_illumination
+        description: Moon illumination percentage.
+  - name: fct_whoop_sleep_quality
+    description: |
+      Fact table containing sleep quality and performance metrics for WHOOP sleep events.
+      This table focuses on how well you slept and whether your sleep met your physiological needs.
+      
+      **Contains:**
+      - **Sleep identifiers**: sleep_id, sleep_id_of_day, date_day for temporal analysis
+      - **Sleep timing**: sleep_start_date, sleep_onset, wake_up_date, wake_onset, cycle_timezone
+      - **Sleep quality metrics**:
+        - sleep_performance: WHOOP score (percentage) showing how well sleep need was met (0-100%)
+        - respiratory_rate: Average respiratory rate (breaths per minute) during the sleep cycle
+        - sleep_need_minutes/hours: WHOOP-calculated amount of required sleep based on recovery needs
+        - sleep_debt_minutes/hours: Difference between sleep_need and actual sleep obtained (positive = deficit, negative = surplus)
+        - sleep_efficiency: Ratio of time asleep to time in bed (higher is better, typically 85%+ is good)
+        - sleep_consistency: WHOOP measure of bedtime regularity and sleep schedule consistency
+        - nap: Boolean flag indicating whether the sleep event is a nap (vs. main sleep)
+      - **Moon data**:
+        - moon_phase: Moon phase name for the sleep date
+        - moon_phase_cycle: Moon phase cycle information
+        - moon_illumination: Moon illumination percentage
+      
+      **Use this table when you need:**
+      - Sleep quality and performance analysis
+      - Sleep need vs. actual sleep comparisons
+      - Sleep debt tracking and analysis
+      - Sleep efficiency metrics
+      - Sleep consistency and schedule regularity
+      - Respiratory rate monitoring during sleep
+      - Identifying naps vs. main sleep periods
+      - Correlating sleep quality with recovery metrics
+      
+      **Note**: This table can be joined with fct_whoop_sleeps using sleep_id to combine quality and duration metrics. Also links to fct_whoop_physiological_cycles via sleep_id for recovery analysis.
+      **Source**: Based on WHOOP Sleep API data. Sleep performance scores are calculated using WHOOP's algorithms that consider sleep need, actual sleep obtained, and recovery requirements.
+      **Reference**: https://developer.whoop.com/docs/developing/user-data/sleep
+    materialized: table
+    columns:
+      - name: sleep_id
+        description: Unique identifier for the sleep event.
+
+      - name: sleep_id_of_day
+        description: Unique identifier for the sleep event within the day.
+
+      - name: date_day
+        description: Date of the night.
+
+      - name: sleep_start_date
+        description: Date of the sleep start.
+
+      - name: sleep_onset
+        description: Time when actual sleep began.
+
+      - name: wake_up_date
+        description: Date of the wake up.
+
+      - name: wake_onset
+        description: Time of final awakening.
+
+      - name: cycle_timezone
+        description: Timezone in which the cycle was recorded.
+
+      - name: sleep_performance
+        description: WHOOP score showing how well sleep need was met.
+
+      - name: respiratory_rate
+        description: Average respiratory rate during the sleep cycle.
+
+      - name: sleep_need_minutes
+        description: WHOOP‑calculated amount of required sleep in minutes.
+
+      - name: sleep_need_hours
+        description: WHOOP‑calculated amount of required sleep in hours (calculated from minutes).
+
+      - name: sleep_debt_minutes
+        description: Difference between sleep need and actual sleep in minutes (positive = deficit, negative = surplus).
+
+      - name: sleep_debt_hours
+        description: Difference between sleep need and actual sleep in hours (calculated from minutes).
+
+      - name: sleep_efficiency
+        description: Ratio of time asleep to time in bed.
+
+      - name: sleep_consistency
+        description: WHOOP measure of bedtime regularity.
+
+      - name: nap
+        description: Indicates whether the sleep event is a nap.
+
+      - name: moon_phase
+        description: Moon phase name for the sleep date.
+
+      - name: moon_phase_cycle
+        description: Moon phase cycle information.
+
+      - name: moon_illumination
+        description: Moon illumination percentage.
+
+  - name: fct_whoop_physiological_cycles
+    description: |
+      Fact table containing comprehensive physiological and recovery metrics for WHOOP daily cycles.
+      This is the primary table for analyzing recovery, readiness, and overall physiological state. Each cycle represents a 24-hour period from sleep to sleep.
+      
+      **Contains:**
+      - **Cycle identifiers**: sleep_id, sleep_id_of_day, date_day for temporal analysis
+      - **Sleep timing**: sleep_start_date, sleep_onset, wake_up_date, wake_onset, cycle_timezone
+      - **Recovery metrics (calculated from sleep data)**:
+        - recovery_score: WHOOP recovery score (0-100%) indicating how recovered you are for the day
+        - resting_heart_rate: Resting heart rate measured during sleep (beats per minute)
+        - heart_rate_variability: HRV measurement indicating autonomic nervous system recovery (milliseconds)
+        - skin_temp: Skin temperature measured during sleep (degrees)
+        - blood_oxygen: Blood oxygen saturation level during sleep (SpO2 percentage)
+        - respiratory_rate: Average respiratory rate during sleep (breaths per minute)
+      - **Strain metrics (calculated from workout data)**:
+        - day_strain: Total daily strain score (0-21 scale) from all activities
+        - energy_burned: Total calories/energy burned throughout the day
+        - max_hr: Maximum heart rate reached during the day (beats per minute)
+        - average_hr: Average heart rate throughout the day (beats per minute)
+      
+      **Use this table when you need:**
+      - Recovery analysis and readiness assessment
+      - HRV (Heart Rate Variability) tracking and trends
+      - Resting heart rate monitoring
+      - Daily strain vs. recovery balance
+      - Physiological state correlation with performance
+      - Blood oxygen and respiratory rate analysis
+      - Skin temperature trends
+      - Overall health and fitness monitoring
+      - Planning training intensity based on recovery
+      
+      **Note**: This table combines metrics from both sleep (recovery) and workout (strain) data. Can be joined with fct_whoop_sleeps and fct_whoop_workouts using sleep_id and date_day respectively for detailed analysis.
+      **Source**: Based on WHOOP Physiological Cycle API data. Recovery metrics are calculated from sleep data, while strain metrics are aggregated from workout activities.
+      **Reference**: https://developer.whoop.com/docs/developing/user-data/physiological-cycle
+    materialized: table
+
+  - name: fct_whoop_workouts
+    description: |
+      Fact table containing workout and activity metrics for WHOOP-detected exercise events.
+      This table tracks all physical activities detected by WHOOP, including structured workouts and general activity.
+      
+      **Contains:**
+      - **Workout identifiers**: whoop_workout_id, whoop_workout_id_of_day, date_day for temporal analysis
+      - **Workout timing**:
+        - workout_start_time: Timestamp when the workout began
+        - workout_end_time: Timestamp when the workout ended
+        - duration: Total duration of the workout (typically in seconds or minutes)
+      - **Activity metrics**:
+        - activity_name: Name/type of the activity (e.g., "Running", "Cycling", "Weight Training")
+        - activity_strain: WHOOP strain score for this specific workout (0-21 scale, where higher = more intense)
+        - energy_burned: Calories/energy burned during this workout
+      - **Heart rate metrics**:
+        - max_hr: Maximum heart rate reached during the workout (beats per minute)
+        - average_hr: Average heart rate during the workout (beats per minute)
+        - hr_zone_1_percentage: Percentage of time spent in heart rate zone 1 (recovery/easy)
+        - hr_zone_2_percentage: Percentage of time spent in heart rate zone 2 (aerobic/base)
+        - hr_zone_3_percentage: Percentage of time spent in heart rate zone 3 (tempo)
+        - hr_zone_4_percentage: Percentage of time spent in heart rate zone 4 (threshold)
+        - hr_zone_5_percentage: Percentage of time spent in heart rate zone 5 (VO2 max/anaerobic)
+      - **GPS metrics**:
+        - gps_enabled: Boolean flag indicating if GPS tracking was enabled for this workout
+      
+      **Use this table when you need:**
+      - Workout intensity analysis (strain scores)
+      - Heart rate zone distribution analysis
+      - Energy expenditure tracking
+      - Workout duration and frequency analysis
+      - Activity type categorization
+      - Training load and volume calculations
+      - Heart rate response to different activities
+      - GPS-enabled vs. indoor activity analysis
+      - Correlating workout strain with recovery metrics
+      
+      **Note**: Workout strain from this table contributes to the day_strain metric in fct_whoop_physiological_cycles. Can be joined with physiological cycles using date_day to analyze workout impact on recovery.
+      **Source**: Based on WHOOP Workout API data. Activities are automatically detected by WHOOP or manually logged. Strain scores are calculated using heart rate data and activity intensity.
+      **Reference**: https://developer.whoop.com/docs/developing/user-data/workout
+    materialized: table
+    

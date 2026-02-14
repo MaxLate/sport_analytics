@@ -2,11 +2,11 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'sport_analytics_transform'
+name: 'dbt_model'
 version: '1.0.0'
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'sport_analytics_transform'
+profile: 'strava_analytics'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -22,6 +22,9 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
+on-run-start:
+  - "{{ attach_databases() }}"
+
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -30,7 +33,19 @@ clean-targets:         # directories to be removed by `dbt clean`
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
 models:
-  sport_analytics_transform:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+  dbt_model:
+    +materialized: table   # default for all models
+
+    staging:
+      +database: source
+      +materialized: view  # Staging = Views
+
+    intermediate:
+      +database: transform
+
+    metrics:
+      +database: analytics
+
+seeds:
+  +database: source
+  +schema: seeds

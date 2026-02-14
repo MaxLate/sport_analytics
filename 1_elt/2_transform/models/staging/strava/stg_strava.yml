@@ -1,0 +1,132 @@
+version: 2
+
+sources:
+  - name: strava
+    database: source
+    description: Strava activities data used for analysis and modeling.
+    schema: strava
+
+    tables:
+      - name: strava_activities
+        description: Strava activities data used for analysis and modeling.
+
+models:
+  - name: stg_strava_activities
+    description: "Staging model for Strava activities data, based on the Strava API v3 Activities (DetailedActivity) response."
+    columns:
+
+      - name: activity_id
+        description: "Unique identifier for the activity (corresponds to the `id` field in the DetailedActivity response). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: name
+        description: "Name of the activity as set by the athlete (field `name`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: type
+        description: "Legacy activity type classification (e.g. Run, Ride), corresponding to the `type` field. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: sport_type
+        description: "Sport-specific activity type (e.g. Run, MountainBikeRide, Ride), corresponding to the `sport_type` field used in create/get activity endpoints. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: start_date
+        description: "Activity start datetime in UTC (field `start_date` in the DetailedActivity sample response). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: start_date_local
+        description: "Activity start datetime in the athlete’s local timezone (field `start_date_local`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: timezone
+        description: "Human-readable timezone string associated with the activity (field `timezone`, e.g. “(GMT-08:00) America/Los_Angeles”). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+        data_tests:
+          - not_null
+
+      - name: distance
+        description: "Total recorded distance of the activity (field `distance` in the DetailedActivity response). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: moving_time
+        description: "Total moving time during the activity (field `moving_time`), excluding pauses. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: elapsed_time
+        description: "Total elapsed time of the activity (field `elapsed_time`), including pauses. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: total_elevation_gain
+        description: "Total elevation gain for the activity (field `total_elevation_gain`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: average_speed
+        description: "Average speed over the activity (field `average_speed` in DetailedActivity). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: max_speed
+        description: "Maximum speed recorded during the activity (field `max_speed`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: average_heartrate
+        description: "Average heart rate over the activity when heart rate data is available (field `average_heartrate` in DetailedActivity). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: max_heartrate
+        description: "Maximum heart rate recorded during the activity when heart rate data is available (field `max_heartrate` in DetailedActivity). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: average_watts
+        description: "Average power output for the activity (field `average_watts` in the DetailedActivity response). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: kilojoules
+        description: "Total work performed during the activity, as reported in the `kilojoules` field of DetailedActivity for power-enabled activities. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: average_cadence
+        description: "Average cadence over the activity (field `average_cadence` in DetailedActivity, where applicable – typically cycling). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: achievement_count
+        description: "Number of achievements (e.g. PRs, segment results) associated with the activity (field `achievement_count`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: kudos_count
+        description: "Number of kudos the activity has received from other athletes (field `kudos_count`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: comment_count
+        description: "Number of comments on the activity (field `comment_count`, matching the List Activity Comments endpoint semantics). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: athlete_count
+        description: "Number of athletes participating in the activity (field `athlete_count`, relevant for group activities). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: trainer
+        description: "Flag indicating whether the activity was performed on a trainer (field `trainer`; also set via the `trainer` parameter in Create Activity). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: commute
+        description: "Flag indicating whether the activity is marked as a commute (field `commute`; also set via the `commute` parameter in Create Activity). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: manual
+        description: "Flag indicating whether the activity was manually created instead of uploaded from a device (field `manual`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: private
+        description: "Flag indicating whether the activity’s visibility is private (field `private`, as shown in the DetailedActivity response). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: flagged
+        description: "Flag indicating whether the activity has been flagged for review or issues (field `flagged`). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: gear_id
+        description: "Identifier of the gear used for the activity (field `gear_id`, which links to a gear/equipment resource such as a bike). Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: start_latitude
+        description: "Latitude component of the activity start location, derived from the first element of the `start_latlng` array in DetailedActivity. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: start_longitude
+        description: "Longitude component of the activity start location, derived from the second element of the `start_latlng` array in DetailedActivity. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: end_latitude
+        description: "Latitude component of the activity end location, derived from the first element of the `end_latlng` array in DetailedActivity. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: end_longitude
+        description: "Longitude component of the activity end location, derived from the second element of the `end_latlng` array in DetailedActivity. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
+
+      - name: extracted_at
+        description: "Timestamp when this activity record was extracted from the Strava API by the ingestion pipeline. Source: internal ETL logic; this field is not part of the Strava Activities API specification – see https://developers.strava.com/docs/reference/#api-Activities for the upstream activity fields."
+        data_tests:
+          - not_null

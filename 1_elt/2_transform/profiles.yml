@@ -1,0 +1,18 @@
+strava_analytics:
+  target: transform
+  outputs:
+    source:
+      type: duckdb
+      path: ../../data/database/source.duckdb
+      database: source
+      schema: main
+    transform:
+      type: duckdb
+      path: ../../data/database/transform.duckdb
+      database: transform
+      schema: main
+    analytics:
+      type: duckdb
+      path: ../../data/database/analytics.duckdb
+      database: analytics
+      schema: main

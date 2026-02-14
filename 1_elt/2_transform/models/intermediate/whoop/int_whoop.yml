@@ -1,0 +1,185 @@
+models:
+  - name: int_whoop_sleep
+    description: |
+      Intermediate and enhanced table for WHOOP sleep data.
+      This table combines WHOOP sleep data with moon phase data and adds calculated identifiers.
+      It serves as the source for both fct_whoop_sleeps and fct_whoop_sleep_quality fact tables.
+    materialized: table
+    columns:
+      - name: sleep_id
+        description: Unique identifier for the sleep event, calculated using row_number() over sleep_onset.
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('int_whoop_physiological_cycles')
+              field: sleep_id
+
+      - name: sleep_id_of_day
+        description: Unique identifier for the sleep event within the day, calculated using row_number() partitioned by day.
+        tests:
+          - not_null
+
+      - name: date_day
+        description: 'Date of the sleep episode, calculated with logic to handle sleep that starts after midnight (subtracts 1 day if sleep onset is before 12:00 and not a nap). {{ doc("date_day") }}'
+        tests:
+          - not_null
+
+      - name: sleep_start_date
+        description: Date of the sleep start, calculated using date_trunc on sleep_onset.
+        tests:
+          - not_null
+
+      - name: wake_up_date
+        description: Date of the wake up, calculated using date_trunc on wake_onset.
+        tests:
+          - not_null
+
+      - name: asleep_duration_hours
+        description: Total hours spent actually asleep, calculated from asleep_duration (divided by 60).
+
+      - name: in_bed_duration_hours
+        description: Total hours spent in bed, calculated from in_bed_duration (divided by 60).
+
+      - name: light_sleep_duration_hours
+        description: Duration of light sleep stage in hours, calculated from light_sleep_duration (divided by 60).
+
+      - name: deep_sleep_duration_hours
+        description: Duration of deep sleep stage in hours, calculated from deep_sleep_duration (divided by 60).
+
+      - name: rem_duration_hours
+        description: Duration of REM sleep stage in hours, calculated from rem_duration (divided by 60).
+
+      - name: awake_duration_hours
+        description: Duration of awake time during the sleep period in hours, calculated from awake_duration (divided by 60).
+
+      - name: sleep_need_hours
+        description: WHOOP-calculated amount of required sleep in hours, calculated from sleep_need (divided by 60).
+
+      - name: sleep_debt_hours
+        description: Portion of sleep need from accumulated sleep debt in hours, calculated from sleep_debt (divided by 60).
+
+      - name: moon_phase
+        description: Moon phase name for the sleep date, joined from moon data (stg_dbt_seeds_moon_data).
+
+      - name: moon_illumination
+        description: Moon illumination percentage, joined from moon data (mapped from illumination field in stg_dbt_seeds_moon_data).
+
+      - name: moon_phase_cycle
+        description: Moon phase cycle information, joined from moon data (mapped from phase_cycle field in stg_dbt_seeds_moon_data).
+
+  - name: int_whoop_physiological_cycles
+    description: Intermediate and enhanced table for WHOOP physiological cycles data.
+    materialized: table
+    columns:
+      - name: sleep_id
+        description: Unique identifier for the sleep event, calculated using row_number() over sleep_onset.
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('int_whoop_sleep')
+              field: sleep_id
+
+      - name: sleep_id_of_day
+        description: Unique identifier for the sleep event within the day, calculated using row_number() partitioned by day.
+        tests:
+          - not_null
+
+      - name: sleep_start_date
+        description: Date of the sleep start, calculated using date_trunc on sleep_onset.
+        tests:
+          - not_null
+
+      - name: wake_up_date
+        description: Date of the wake up, calculated using date_trunc on wake_onset.
+        tests:
+          - not_null
+
+      - name: date_day
+        description: 'Date of the physiological cycle, calculated with logic to handle sleep that starts after midnight (subtracts 1 day if sleep onset is before 12:00 and not a nap), joined with int_whoop_sleep to check nap status. {{ doc("date_day") }}'
+        tests:
+          - not_null
+  - name: int_whoop_workouts
+    description: Intermediate and enhanced table for WHOOP workouts data.
+    materialized: table
+    columns:
+      - name: whoop_workout_id
+        description: Unique identifier for the workout event, calculated using row_number() over workout_start_time.
+        tests:
+          - unique
+          - not_null
+
+      - name: whoop_workout_id_of_day
+        description: Unique identifier for the workout event within the day, calculated using row_number() partitioned by day.
+        tests:
+          - not_null
+
+      - name: date_day
+        description: Date of the day which the workout event belongs to, calculated using date_trunc on workout_start_time.
+        tests:
+          - not_null
+
+      - name: duration_minutes
+        description: Total duration of the workout in minutes, calculated using date_diff between workout_start_time and workout_end_time.
+        tests:
+          - greater_than_or_equal_to:
+              value: 0
+
+      - name: workout_start_time
+        description: Timestamp when the workout began.
+        tests:
+          - not_null
+
+      - name: workout_end_time
+        description: Timestamp when the workout ended.
+        tests:
+          - not_null
+
+      - name: activity_strain
+        description: WHOOP strain score for this specific workout (0-21 scale, where higher = more intense).
+
+      - name: average_heart_rate
+        description: Average heart rate during the workout (beats per minute).
+
+      - name: max_heart_rate
+        description: Maximum heart rate reached during the workout (beats per minute).
+
+      - name: kilojoule
+        description: Total energy/calories burned during the workout.
+
+      - name: percent_recorded
+        description: Percentage of the workout that was successfully recorded by WHOOP.
+
+      - name: distance_meter
+        description: Total distance covered during the workout in meters (if GPS-enabled).
+
+      - name: altitude_gain_meter
+        description: Total elevation gain during the workout in meters.
+
+      - name: altitude_change_meter
+        description: Total elevation change during the workout in meters.
+
+      - name: zone_zero_milli
+        description: Time spent in heart rate zone 0 (recovery) in milliseconds.
+
+      - name: zone_one_milli
+        description: Time spent in heart rate zone 1 (recovery/easy) in milliseconds.
+
+      - name: zone_two_milli
+        description: Time spent in heart rate zone 2 (aerobic/base) in milliseconds.
+
+      - name: zone_three_milli
+        description: Time spent in heart rate zone 3 (tempo) in milliseconds.
+
+      - name: zone_four_milli
+        description: Time spent in heart rate zone 4 (threshold) in milliseconds.
+
+      - name: zone_five_milli
+        description: Time spent in heart rate zone 5 (VO2 max/anaerobic) in milliseconds.
+
+      - name: activity_name
+        description: Unified activity name from the activity mapping, aligned across different data sources.
+
+      - name: is_sport_exercise
+        description: Boolean flag indicating whether the activity is considered a sport/exercise activity.

@@ -1,0 +1,32 @@
+source,activity_name,aligned_activity_name,is_sport_exercise
+Whoop,activity,Activity,false
+Whoop,badminton,Badminton,true
+Whoop,commuting,Commuting,false
+Whoop,cycling,Cycling,true
+Whoop,dance,Dance,false
+Whoop,dog-walking,Dog-walking,false
+Whoop,hiit,HIIT,true
+Whoop,hiking-rucking,Hiking,true
+Whoop,increase_relaxation,Breath Work,false
+Whoop,padel,Padel,true
+Whoop,powerlifting,WeightTraining,true
+Whoop,running,Run,true
+Whoop,sauna,Sauna,false
+Whoop,sculpt-yoga,Yoga,true
+Whoop,ski-touring,Nordic Ski,true
+Whoop,swimming,Swim,true
+Whoop,table-tennis,Table Tennis,false
+Whoop,walking,Commuting,false
+Whoop,weightlifting,WeightTraining,true
+Whoop,yoga,Yoga,true
+Strava,Ride,cycling,true
+Strava,Racquetball,badminton,true
+Strava,NordicSki,Nordic Ski,true
+Strava,Workout,WeightTraining,true
+Strava,WeightTraining,WeightTraining,true
+Strava,HighIntensityIntervalTraining,HIIT,true
+Strava,Crossfit,WeightTraining,true
+Strava,Hike,Hiking,true
+Strava,Yoga,Yoga,true
+Strava,Run,Run,true
+Strava,Swim,Swim,true

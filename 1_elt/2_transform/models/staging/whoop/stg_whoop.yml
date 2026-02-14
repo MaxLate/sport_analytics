@@ -1,0 +1,373 @@
+sources:
+  - name: whoop
+    database: source
+    description: WHOOP sleep data used for analysis and modeling.
+    schema: whoop
+
+    tables:
+      - name: whoop_sleeps
+        description: WHOOP sleep data used for analysis and modeling.
+
+      - name: whoop_physiological_cycles
+        description: WHOOP physiological cycles data used for analysis and modeling.
+
+      - name: whoop_workouts
+        description: WHOOP workouts data used for analysis and modeling.
+
+models:
+      - name: stg_whoop_sleep
+        description: "Staging table containing WHOOP sleep activity metrics at the sleep-episode level, aligned with the SleepScore model from WHOOP's Sleep data type. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+        columns:
+          - name: sleep_id
+            description: "Unique identifier for the sleep episode, derived from WHOOP's sleep id field (Sleep.id). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+              - unique
+
+          - name: sleep_onset
+            description: "Timestamp when WHOOP marks the beginning of this sleep episode (sleep start time bound). Based on the start time of the sleep activity. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+
+          - name: wake_onset
+            description: "Timestamp when WHOOP marks the end of this sleep episode (final wake time bound). Based on the end time of the sleep activity. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+
+          - name: sleep_performance
+            description: "WHOOP sleep performance score for this sleep, expressed as a percentage that compares sleep obtained to the sleep needed for the associated physiological cycle (SleepScore.sleep_performance_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: respiratory_rate
+            description: "Average respiratory rate across this sleep episode, in breaths per minute, as reported by WHOOP's SleepScore.respiratory_rate metric. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: asleep_duration
+            description: "Total time spent asleep during this sleep episode, in minutes, derived from WHOOP stage summary metrics (sum of light, slow-wave, and REM sleep durations). See the stage_summary fields in [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: in_bed_duration
+            description: "Total time spent in bed during this sleep episode, in minutes, including periods awake (SleepScore.stage_summary.total_in_bed_time_milli). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: light_sleep_duration
+            description: "Time spent in light sleep during this sleep episode, in minutes, derived from total_light_sleep_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: rem_duration
+            description: "Time spent in REM sleep during this sleep episode, in minutes, derived from total_rem_sleep_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: deep_sleep_duration
+            description: "Time spent in slow-wave (deep) sleep during this sleep episode, in minutes, derived from total_slow_wave_sleep_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: awake_duration
+            description: "Time spent awake while in bed during this sleep episode, in minutes, derived from total_awake_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_need
+            description: "Total amount of sleep WHOOP determines the member needs for the associated physiological cycle, in minutes, combining baseline need, recent strain, prior sleep debt, and naps (SleepScore.sleep_needed fields). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_debt
+            description: "Portion of the member's sleep need that comes specifically from previously accumulated sleep debt for this cycle, in minutes, corresponding to need_from_sleep_debt_milli within SleepScore.sleep_needed. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_efficiency
+            description: "WHOOP sleep efficiency score for this episode, expressed as a percentage representing how much of the time in bed was spent asleep (SleepScore.sleep_efficiency_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_consistency
+            description: "WHOOP sleep consistency score for this cycle, expressed as a percentage; higher values indicate sleep and wake times that are more regular relative to the member’s recent baseline (SleepScore.sleep_consistency_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: nap
+            description: "Boolean flag indicating whether this sleep activity is a nap rather than the main nightly sleep; naps reduce the sleep needed for the next physiological cycle (Sleep.nap). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - accepted_values:
+                  values: [true, false]
+  
+      - name: stg_whoop_physiological_cycles
+        description: "Staging table containing WHOOP physiological cycle metrics, combining Cycle, Recovery, and SleepScore measurements per physiological cycle. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle), [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery), and [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+        columns:
+          - name: cycle_start_time
+            description: "Start time bound of the physiological cycle, corresponding to the Cycle.start field that defines when this awake–asleep cycle begins. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle)."
+            data_tests:
+              - not_null
+
+          - name: cycle_end_time
+            description: "End time bound of the physiological cycle, corresponding to Cycle.end; if absent in the raw data, the user is currently in this ongoing cycle. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle)."
+            data_tests:
+              - not_null
+
+          - name: cycle_timezone
+            description: "User's timezone offset at the time the physiological cycle was recorded, following Time Zone Designator format (for example '+02:00', '-05:00', or 'Z'), based on Cycle.timezone_offset. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle)."
+            data_tests:
+              - not_null
+
+          - name: recovery_score
+            description: "WHOOP Recovery score for this physiological cycle, expressed as a percentage from 0–100 that reflects how prepared the body is to take on strain that day (RecoveryScore.recovery_score). See [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: resting_heart_rate
+            description: "Resting heart rate (RHR) associated with this recovery, measured in beats per minute and used as an input to the WHOOP Recovery score (RecoveryScore.resting_heart_rate). See [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: heart_rate_variability
+            description: "Heart rate variability (HRV) during the recovery period, measured as RMSSD in milliseconds (RecoveryScore.hrv_rmssd_milli), and used by WHOOP to assess autonomic nervous system balance. See [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: skin_temp
+            description: "Skin temperature measured during the recovery period for this cycle, in degrees Celsius, as reported by RecoveryScore.skin_temp_celsius. See [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: blood_oxygen
+            description: "Average blood oxygen saturation (SpO₂) during the recovery period for this cycle, reported as a percentage via RecoveryScore.spo2_percentage. See [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: day_strain
+            description: "WHOOP strain score for this physiological cycle, summarizing the total cardiovascular load experienced across the cycle (Cycle.score.strain). WHOOP describes strain as a proprietary score of overall exertion. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle) and [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: energy_burned
+            description: "Total energy expenditure over the physiological cycle, in calories, derived from WHOOP’s kilojoule energy estimate in the cycle score (Cycle.score.kilojoule and similar workout metrics). See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle) and [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: max_hr
+            description: "Maximum heart rate recorded during this physiological cycle, in beats per minute, based on Cycle.score.max_heart_rate. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: average_hr
+            description: "Average heart rate across the physiological cycle, in beats per minute, based on Cycle.score.average_heart_rate. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_onset
+            description: "Timestamp when WHOOP marks the beginning of the primary sleep episode associated with this physiological cycle (sleep start time bound). Based on the Sleep.start field. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+
+          - name: wake_onset
+            description: "Timestamp when WHOOP marks the end of the primary sleep episode for this physiological cycle (final wake time bound), based on Sleep.end. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+
+          - name: sleep_performance
+            description: "WHOOP sleep performance score for the cycle’s primary sleep, expressed as a percentage that compares sleep obtained to sleep needed (SleepScore.sleep_performance_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: respiratory_rate
+            description: "Average respiratory rate across the primary sleep episode in this cycle, in breaths per minute, as reported by SleepScore.respiratory_rate. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - not_null
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: asleep_duration
+            description: "Total time spent asleep during the primary sleep episode of this cycle, in minutes, derived from WHOOP sleep stage summary durations. See the stage_summary fields in [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: in_bed_duration
+            description: "Total time spent in bed for the primary sleep episode in this cycle, in minutes, including any awake time (SleepScore.stage_summary.total_in_bed_time_milli). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: light_sleep_duration
+            description: "Time spent in light sleep during the primary sleep episode of this cycle, in minutes, derived from total_light_sleep_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: deep_sleep_duration
+            description: "Time spent in slow-wave (deep) sleep during the primary sleep episode of this cycle, in minutes, derived from total_slow_wave_sleep_time_milli. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: rem_duration
+            description: "Time spent in REM sleep during the primary sleep episode of this cycle, in minutes, derived from total_rem_sleep_time_milli in WHOOP's sleep stage summary. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: awake_duration
+            description: "Time spent awake while in bed during the primary sleep episode of this cycle, in minutes, derived from total_awake_time_milli. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_need
+            description: "Total amount of sleep WHOOP determines the member needs for this physiological cycle, in minutes, based on baseline need, recent strain, accumulated sleep debt, and naps (SleepScore.sleep_needed). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_debt
+            description: "Portion of the cycle’s sleep need that is specifically attributed to prior sleep debt, in minutes, corresponding to need_from_sleep_debt_milli in SleepScore.sleep_needed. See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_efficiency
+            description: "WHOOP sleep efficiency score for the primary sleep in this cycle, expressed as a percentage indicating how much of the time in bed was spent asleep (SleepScore.sleep_efficiency_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sleep_consistency
+            description: "WHOOP sleep consistency score for this physiological cycle, expressed as a percentage; higher values indicate sleep and wake times that are more regular relative to the member’s recent baseline (SleepScore.sleep_consistency_percentage). See [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+      - name: stg_whoop_workouts
+        description: "Staging table containing WHOOP workout activities, including timing, strain, heart rate, energy expenditure, and time in heart rate zones. This model aligns with WHOOP's Workout data type."
+        columns:
+          - name: whoop_workout_id
+            description: "Unique identifier for the workout, derived from WHOOP's workout id field (Workout.id). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - not_null
+              - unique
+
+          - name: workout_start_time
+            description: "Start timestamp of the workout event, corresponding to the start time bound of the WHOOP workout activity."
+            data_tests:
+              - not_null
+
+          - name: workout_end_time
+            description: "End timestamp of the workout event, corresponding to the end time bound of the WHOOP workout activity."
+            data_tests:
+              - not_null
+
+          - name: whoop_activity_name
+            description: "Human-readable name of the activity (for example 'Morning Run'), either user-defined or generated by WHOOP, used to identify and label the workout."
+
+          - name: activity_strain
+            description: "WHOOP strain score for this workout, representing the overall cardiovascular load of the session as calculated by WHOOP."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: average_heart_rate
+            description: "Average heart rate across the workout, in beats per minute, based on WHOOP's workout scoring metrics (WorkoutScore.average_heart_rate). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: max_heart_rate
+            description: "Maximum heart rate recorded during the workout, in beats per minute, based on WHOOP's workout scoring metrics (WorkoutScore.max_heart_rate). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: kilojoule
+            description: "Total energy expenditure during the workout in kilojoules, derived from WHOOP's workout energy metrics (WorkoutScore.kilojoule). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: percent_recorded
+            description: "Percentage of the workout duration for which data was successfully recorded, indicating data completeness (WorkoutScore.percent_recorded). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+              - less_than_or_equal_to:
+                  value: 100
+
+          - name: distance_meter
+            description: "Total distance covered during the workout in meters, if GPS or distance tracking was enabled (WorkoutScore.distance_meter). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+
+          - name: altitude_gain_meter
+            description: "Total altitude gained during the workout in meters, derived from elevation data if available (WorkoutScore.altitude_gain_meter). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+
+          - name: altitude_change_meter
+            description: "Net altitude change during the workout in meters, accounting for both gains and losses (WorkoutScore.altitude_change_meter). See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+
+          - name: zone_zero_milli
+            description: "Time spent in heart rate zone 0 (below zone 1) during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_zero_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: zone_one_milli
+            description: "Time spent in heart rate zone 1 (lowest training intensity) during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_one_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: zone_two_milli
+            description: "Time spent in heart rate zone 2 during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_two_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: zone_three_milli
+            description: "Time spent in heart rate zone 3 (moderate intensity) during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_three_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: zone_four_milli
+            description: "Time spent in heart rate zone 4 (high intensity) during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_four_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: zone_five_milli
+            description: "Time spent in heart rate zone 5 (very high intensity / near maximal effort) during the workout, in milliseconds, from WorkoutScore.zone_durations.zone_five_milli. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
+            data_tests:
+              - greater_than_or_equal_to:
+                  value: 0
+
+          - name: sport_id
+            description: "Numeric identifier for the sport/activity type, corresponding to WHOOP's sport_id field used to categorize the workout. See [Workout](https://developer.whoop.com/docs/developing/user-data/workout)."
