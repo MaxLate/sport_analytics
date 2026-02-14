@@ -1,0 +1,68 @@
+Introduction to run: activities_query (Text-to-SQL for Strava Activities)
+
+Prerequisites:
+1. Install required packages:
+   - Add to pyproject.toml dependencies: fastapi, uvicorn, python-multipart
+   - Then run: uv sync
+   - Or install directly: uv pip install fastapi uvicorn python-multipart
+
+2. Set up Ollama (Free, Local, No API Key):
+   - Install Ollama: https://ollama.ai/download
+   - Start Ollama: ollama serve (or it may run automatically)
+   - Pull a model: ollama pull llama3.2 (or llama3, mistral, etc.)
+   - Optional: Set custom URL: export OLLAMA_URL="http://localhost:11434"
+   - Optional: Set model: export OLLAMA_MODEL="llama3.2"
+   - No API key needed!
+
+   Note: If Ollama is not available, the system falls back to a simple rule-based generator (limited functionality)
+
+3. Make sure your database is set up:
+   - Database should be at: 0_data/database/analytics.duckdb
+   - Table should exist: semantic.fct_activities
+   - Run dbt to build the table if needed: cd 1_elt/2_transform && dbt run --select fct_activities --target analytics
+
+Running the Application:
+
+1. Start the API (from project root directory):
+   - Option 1 (using uv): uv run uvicorn "2_analytics.Chat-to-Data.api:app" --reload
+   - Option 2 (using python): python -m uvicorn "2_analytics.Chat-to-Data.api:app" --reload
+   - Option 3 (direct path): cd 2_analytics/Chat-to-Data && python -m uvicorn api:app --reload
+   - API will run on: http://127.0.0.1:8000
+
+2. Start the HTML server (from 2_analytics/Chat-to-Data/ directory):
+   - cd 2_analytics/Chat-to-Data
+   - python3 -m http.server 5500
+   - HTML server will run on: http://127.0.0.1:5500
+
+3. Open browser and enter:
+   - http://127.0.0.1:5500/
+
+Note: 
+- Keep both servers running (API on port 8000, HTML on port 5500)
+- The HTML file fetches data from the API at http://127.0.0.1:8000/query
+- You can test the API health at: http://127.0.0.1:8000/health
+- View schema information at: http://127.0.0.1:8000/schema
+
+Example Questions:
+- "How many activities did I do per day?"
+- "List all my running activities"
+- "How many cycling activities did I do?"
+- "What was my first activity of each day?"
+- "Show me activities from the last 30 days"
+- "What sport types do I have?"
+
+Tips:
+- Be specific with your questions for better SQL generation
+- Use date format YYYY-MM-DD when asking about specific dates
+- Sport types are case-sensitive: 'Run', 'Ride', 'Swim', etc.
+- The system uses the YAML schema file for context, so it understands the table structure
+
+Ollama Model Recommendations:
+- llama3.2: Good balance of speed and accuracy (default)
+- llama3: Larger model, better accuracy but slower
+- mistral: Fast and efficient
+- codellama: Specialized for code/SQL generation
+
+To test if Ollama is working:
+  curl http://localhost:11434/api/tags
+

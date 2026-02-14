@@ -1,0 +1,22 @@
+Introduction to run: sleep_analytics
+
+1. Start the API (from project root directory):
+    - Option 1 (using uv): uv run uvicorn "2_analytics.sleep_analytics.api:app" --reload
+    - Option 2 (using python): python -m uvicorn "2_analytics.sleep_analytics.api:app" --reload
+    - Option 3 (direct path): cd 2_analytics/sleep_analytics && python -m uvicorn api:app --reload
+    - API will run on: http://127.0.0.1:8000
+
+2. Start the HTML server (from 2_analytics/sleep_analytics/ directory):
+    - cd 2_analytics/sleep_analytics
+    - python3 -m http.server 5500
+    - HTML server will run on: http://127.0.0.1:5500
+
+3. Open browser and enter:
+     http://127.0.0.1:5500/
+
+Note: 
+- Keep both servers running (API on port 8000, HTML on port 5500)
+- The HTML file fetches data from the API at http://127.0.0.1:8000/data
+- Make sure the database is at: 0_data/database/analytics.duckdb
+- Make sure the table exists: whoop.fct_whoop_sleeps
+- If you're also running the Chat-to-Data API, you'll need to use a different port for one of them

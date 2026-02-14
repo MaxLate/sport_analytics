@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Strava Activities Query - Text-to-SQL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- FONT: ROOBERT -->
+<style>
+@font-face {
+    font-family: 'Roobert';
+    src: url('https://cdn.jsdelivr.net/gh/matthewg101/fonts/roobert/Roobert-Regular.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/matthewg101/fonts/roobert/Roobert-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+* {
+    font-family: 'Roobert', 'Inter', sans-serif !important;
+}
+</style>
+
+<style>
+/* Animated Background */
+body {
+    margin: 0;
+    background: linear-gradient(-45deg, #0e0b16, #1a103d, #230b32, #12071e);
+    background-size: 400% 400%;
+    animation: gradientBG 18s ease infinite;
+    color: white;
+    overflow-x: hidden;
+    padding: 20px;
+    min-height: 100vh;
+}
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+#glow {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.3;
+    background: #5a00ff;
+    z-index: -1;
+    transition: 0.7s ease;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 0px 0px 14px rgba(180,110,255,0.6);
+}
+
+.subtitle {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    opacity: 0.85;
+    font-size: 1.1rem;
+}
+
+/* Main Container */
+#mainContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Query Panel */
+#queryPanel {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow: 0 0 35px rgba(140, 90, 255, 0.22);
+}
+
+#queryForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#questionInput {
+    width: 100%;
+    padding: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    color: white;
+    font-size: 1.1rem;
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'Roobert', sans-serif;
+}
+
+#questionInput::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+#questionInput:focus {
+    outline: none;
+    border-color: rgba(180,110,255,0.6);
+    box-shadow: 0 0 20px rgba(180,110,255,0.3);
+}
+
+#submitBtn {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #8c5aff, #5a00ff);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+}
+
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(140, 90, 255, 0.4);
+}
+
+#submitBtn:active {
+    transform: translateY(0);
+}
+
+#submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Examples */
+.examples {
+    margin-top: 15px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.examples h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.example-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 5px 5px 5px 0;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.example-btn:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+}
+
+/* Results Panel */
+#resultsPanel {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow: 0 0 35px rgba(140, 90, 255, 0.22);
+    display: none;
+}
+
+#resultsPanel.show {
+    display: block;
+}
+
+#sqlDisplay {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #a57bff;
+    overflow-x: auto;
+}
+
+#sqlDisplay .sql-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#errorDisplay {
+    background: rgba(255, 50, 50, 0.2);
+    border: 1px solid rgba(255, 50, 50, 0.4);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #ff6b6b;
+    display: none;
+}
+
+#errorDisplay.show {
+    display: block;
+}
+
+#resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    color: white;
+}
+
+#resultsTable thead {
+    display: table-header-group;
+}
+
+#resultsTable tbody {
+    display: table-row-group;
+}
+
+#resultsTable th {
+    background: rgba(255,255,255,0.1);
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+    font-weight: 600;
+    color: white;
+}
+
+#resultsTable td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: white;
+}
+
+#resultsTable tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+#resultsCount {
+    margin-top: 15px;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* Mobile Responsive */
+@media(max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    #queryPanel, #resultsPanel {
+        padding: 20px;
+    }
+    
+    #resultsTable {
+        font-size: 0.85rem;
+    }
+    
+    #resultsTable th,
+    #resultsTable td {
+        padding: 8px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="glow"></div>
+
+<h1>🏃 Strava Activities Query</h1>
+<p class="subtitle">Ask questions about your activities in natural language</p>
+
+<div id="mainContainer">
+    <!-- Query Panel -->
+    <div id="queryPanel">
+        <form id="queryForm">
+            <textarea 
+                id="questionInput" 
+                placeholder="Ask a question about your activities... (e.g., 'How many activities did I do in March 2025?', 'How many activities in March?', 'List all my cycling activities')"
+                required
+            ></textarea>
+            <button type="submit" id="submitBtn">Query</button>
+        </form>
+        
+        <div class="examples">
+            <h3>Example Questions:</h3>
+            <button type="button" class="example-btn" onclick="setQuestion('How many activities did I do in March 2025?')">March 2025</button>
+            <button type="button" class="example-btn" onclick="setQuestion('How many activities did I do in March?')">All March</button>
+            <button type="button" class="example-btn" onclick="setQuestion('How many activities did I do per day?')">Activities per day</button>
+            <button type="button" class="example-btn" onclick="setQuestion('List all my running activities')">All runs</button>
+            <button type="button" class="example-btn" onclick="setQuestion('How many cycling activities did I do?')">Count rides</button>
+            <button type="button" class="example-btn" onclick="setQuestion('How many runs did I do in 2025?')">Runs in 2025</button>
+            <button type="button" class="example-btn" onclick="setQuestion('Show me activities from the last 30 days')">Last 30 days</button>
+            <button type="button" class="example-btn" onclick="setQuestion('What activities did I do this month?')">This month</button>
+            <button type="button" class="example-btn" onclick="setQuestion('What sport types do I have?')">Sport types</button>
+        </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div id="resultsPanel" style="display: block;">
+        <h2 style="margin-top: 0;">Query Results</h2>
+        <div id="sqlDisplay">
+            <div class="sql-label">Generated SQL:</div>
+            <div id="sqlCode">Submit a query to see generated SQL...</div>
+        </div>
+        
+        <div id="errorDisplay"></div>
+        
+        <div id="resultsContainer">
+            <table id="resultsTable"></table>
+            <div id="resultsCount"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = 'http://127.0.0.1:8000';
+
+function setQuestion(question) {
+    document.getElementById('questionInput').value = question;
+    document.getElementById('questionInput').focus();
+}
+
+async function submitQuery() {
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) return;
+
+    const submitBtn = document.getElementById('submitBtn');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const errorDisplay = document.getElementById('errorDisplay');
+    const sqlCode = document.getElementById('sqlCode');
+    const resultsTable = document.getElementById('resultsTable');
+    const resultsCount = document.getElementById('resultsCount');
+
+    // Reset UI
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Querying...';
+    resultsPanel.classList.add('show');
+    errorDisplay.classList.remove('show');
+    errorDisplay.textContent = '';
+    resultsTable.innerHTML = '';
+    resultsCount.textContent = '';
+    sqlCode.textContent = 'Loading...';
+
+    try {
+        console.log('Submitting query:', question);
+        const response = await fetch(`${API_URL}/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: question })
+        });
+
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (!response.ok) {
+            throw new Error(data.detail || `Query failed with status ${response.status}`);
+        }
+
+        // Display SQL
+        sqlCode.textContent = data.sql || 'N/A';
+
+        // Display error if any
+        if (data.error) {
+            errorDisplay.textContent = `Error: ${data.error}`;
+            errorDisplay.classList.add('show');
+            console.error('Query error:', data.error);
+        } else {
+            errorDisplay.classList.remove('show');
+        }
+
+        // Display results - ensure panel is visible
+        resultsPanel.classList.add('show');
+        
+        if (data.result && Array.isArray(data.result) && data.result.length > 0) {
+            const columns = Object.keys(data.result[0]);
+            console.log('Columns:', columns);
+            console.log('Result count:', data.result.length);
+            console.log('First row:', data.result[0]);
+            
+            // Create table header
+            let html = '<thead><tr>';
+            columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            // Create table rows
+            data.result.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    const value = row[col];
+                    // Format the value for display
+                    let displayValue = value;
+                    if (value === null || value === undefined) {
+                        displayValue = '';
+                    } else if (typeof value === 'number') {
+                        displayValue = value.toLocaleString();
+                    } else {
+                        displayValue = String(value);
+                    }
+                    html += `<td>${displayValue}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody>';
+
+            resultsTable.innerHTML = html;
+            resultsCount.textContent = `Found ${data.result.length} result${data.result.length !== 1 ? 's' : ''}`;
+            console.log('Table HTML created, length:', html.length);
+            console.log('Table element:', resultsTable);
+            console.log('Table innerHTML length:', resultsTable.innerHTML.length);
+            
+            // Force visibility
+            resultsPanel.style.display = 'block';
+            resultsPanel.classList.add('show');
+        } else {
+            resultsTable.innerHTML = '';
+            if (data.result && Array.isArray(data.result) && data.result.length === 0) {
+                resultsCount.textContent = 'No results found (query executed successfully but returned 0 rows)';
+            } else {
+                resultsCount.textContent = 'No results found';
+            }
+            console.warn('No results or invalid result format:', data.result);
+        }
+
+    } catch (error) {
+        console.error('Fetch error:', error);
+        errorDisplay.textContent = `Error: ${error.message}`;
+        errorDisplay.classList.add('show');
+        sqlCode.textContent = 'Error occurred';
+        resultsTable.innerHTML = '';
+        resultsCount.textContent = '';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Query';
+    }
+}
+
+// Test API connection on page load
+window.addEventListener('load', async () => {
+    try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        console.log('API health check:', data);
+        
+        // Test with a simple query to verify everything works
+        console.log('Testing API with sample query...');
+        const testResponse = await fetch(`${API_URL}/query?question=How many activities`);
+        const testData = await testResponse.json();
+        console.log('Test query response:', testData);
+        
+        if (testData.result && testData.result.length > 0) {
+            console.log('✅ API is working! Sample data:', testData.result[0]);
+        }
+    } catch (error) {
+        console.error('API connection failed:', error);
+        const errorDisplay = document.getElementById('errorDisplay');
+        errorDisplay.textContent = `Warning: Cannot connect to API at ${API_URL}. Make sure the API server is running.`;
+        errorDisplay.classList.add('show');
+        document.getElementById('resultsPanel').classList.add('show');
+    }
+});
+
+// Form submission
+document.getElementById('queryForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitQuery();
+});
+
+// Enter key to submit (Shift+Enter for new line)
+document.getElementById('questionInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitQuery();
+    }
+});
+</script>
+
+</body>
+</html>
+

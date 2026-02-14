@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sleep Performance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- FONT: ROOBERT -->
+<style>
+@font-face {
+    font-family: 'Roobert';
+    src: url('https://cdn.jsdelivr.net/gh/matthewg101/fonts/roobert/Roobert-Regular.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/matthewg101/fonts/roobert/Roobert-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+* {
+    font-family: 'Roobert', 'Inter', sans-serif !important;
+}
+</style>
+
+<style>
+/* Animated Background */
+body {
+    margin: 0;
+    background: linear-gradient(-45deg, #0e0b16, #1a103d, #230b32, #12071e);
+    background-size: 400% 400%;
+    animation: gradientBG 18s ease infinite;
+    color: white;
+    overflow-x: hidden;
+    padding-bottom: 250px;
+}
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+#moon_glow {
+    position: fixed;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    filter: blur(150px);
+    opacity: 0.4;
+    background: #5a00ff;
+    z-index: -1;
+    transition: 0.7s ease;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-top: 70px;
+    margin-bottom: 5px;
+    text-align: center;
+    text-shadow: 0px 0px 14px rgba(180,110,255,0.6);
+}
+h3 {
+    text-align: center;
+    margin-top: 0;
+    opacity: 0.85;
+}
+
+/* Panel Frame */
+#panelFrame {
+    width: 85%;
+    margin: 40px auto;
+    padding: 35px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 0 35px rgba(140, 90, 255, 0.22);
+}
+
+#contentRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+}
+#leftPanel {
+    flex: 2;
+    padding-right: 30px;
+    border-right: 1px solid rgba(255,255,255,0.18);
+}
+#rightPanel {
+    flex: 1;
+    padding-left: 30px;
+}
+
+.chart-box {
+    width: 100%;
+    max-width: 620px;
+    aspect-ratio: 1 / 1;
+}
+
+.card {
+    background: rgba(255,255,255,0.07);
+    border-radius: 18px;
+    padding: 26px;
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 0 20px rgba(140,90,255,0.15);
+    font-size: 1.2rem;
+}
+
+#sliderContainer {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    text-align: center;
+}
+
+#emoji {
+    font-size: 4rem;
+    margin-top: 10px;
+}
+
+/* Moon Animation */
+@keyframes moonPulse {
+    0%   { transform: scale(1);    filter: drop-shadow(0 0 8px rgba(255,255,255,0.15)); }
+    50%  { transform: scale(1.06); filter: drop-shadow(0 0 18px rgba(255,255,255,0.35)); }
+    100% { transform: scale(1);    filter: drop-shadow(0 0 8px rgba(255,255,255,0.15)); }
+}
+.animated-moon {
+    animation: moonPulse 3.5s ease-in-out infinite;
+}
+
+/* Mobile */
+@media(max-width: 1100px) {
+    #contentRow {
+        flex-direction: column;
+    }
+    #leftPanel {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.18);
+        padding-bottom: 25px;
+    }
+    #rightPanel {
+        padding-left: 0;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="moon_glow"></div>
+
+<h1>🌙 Sleep Analysis</h1>
+<h3>A dynamic dashboard created and engineered by Max Späth</h3>
+
+<div id="panelFrame">
+    <div id="contentRow">
+
+        <div id="leftPanel">
+            <canvas id="radarChart" class="chart-box"></canvas>
+        </div>
+
+        <div id="rightPanel">
+            <div class="card">
+                <h2 id="moonTitle"></h2>
+                <p><strong>Nights counted:</strong> <span id="nightsCount"></span></p>
+                <p><strong>Total asleep:</strong> <span id="asleep"></span></p>
+                <p><strong>Light Sleep:</strong> <span id="light"></span></p>
+                <p><strong>Deep Sleep:</strong> <span id="deep"></span></p>
+                <p><strong>REM Sleep:</strong> <span id="rem"></span></p>
+                <p><strong>Awake:</strong> <span id="awake"></span></p>
+                <p><strong>In Bed:</strong> <span id="inBed"></span></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="sliderContainer">
+    <input type="range" id="slider" min="0" max="7" step="1" value="0" />
+    <div id="emoji">🌑</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<script>
+// Load data
+let data = [];
+fetch("http://127.0.0.1:8000/data")
+    .then(r => r.json())
+    .then(json => {
+        data = json;
+        console.log("Data loaded:", data.length, "records");
+        if (data.length > 0) {
+            console.log("Sample moon phases:", [...new Set(data.map(d => d.moon_phase))]);
+        }
+        updateUI();
+    })
+    .catch(error => {
+        console.error("Error loading data:", error);
+        alert("Failed to load data. Make sure the API is running on http://127.0.0.1:8000");
+    });
+
+// Convert minutes → HH:MM
+function minutesToHHMM(mins) {
+    const h = String(Math.floor(mins / 60)).padStart(2, "0");
+    const m = String(Math.round(mins % 60)).padStart(2, "0");
+    return `${h}:${m}`;
+}
+
+const moonPhases = [
+    { name: "New Moon", emoji: "🌑" },
+    { name: "Waxing Crescent", emoji: "🌒" },
+    { name: "First Quarter", emoji: "🌓" },
+    { name: "Waxing Gibbous", emoji: "🌔" },
+    { name: "Full Moon", emoji: "🌕" },
+    { name: "Waning Gibbous", emoji: "🌖" },
+    { name: "Last Quarter", emoji: "🌗" },
+    { name: "Waning Crescent", emoji: "🌘" }
+];
+
+const slider = document.getElementById("slider");
+slider.oninput = updateUI;
+
+let radarChart = null;
+
+function updateUI() {
+    if (!data || data.length === 0) {
+        console.warn("No data available yet");
+        return;
+    }
+
+    const i = parseInt(slider.value);
+    const phase = moonPhases[i];
+
+    document.getElementById("emoji").innerHTML =
+        `<span class="animated-moon">${phase.emoji}</span>`;
+
+    const filtered = data.filter(d =>
+        d.moon_phase && d.moon_phase.trim().toLowerCase() === phase.name.trim().toLowerCase()
+    );
+
+    console.log(`Filtering for "${phase.name}": found ${filtered.length} records`);
+    console.log("Available moon phases in data:", [...new Set(data.map(d => d.moon_phase))]);
+    
+    if (!filtered.length) {
+        console.warn(`No data found for moon phase: ${phase.name}`);
+        console.warn("Available phases:", [...new Set(data.map(d => d.moon_phase))]);
+        return;
+    }
+
+    const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+
+    // averages in minutes
+    const asleepMin = avg(filtered.map(d => d.asleep_duration_minutes));
+    const lightMin  = avg(filtered.map(d => d.light_sleep_duration_minutes));
+    const deepMin   = avg(filtered.map(d => d.deep_sleep_duration_minutes));
+    const remMin    = avg(filtered.map(d => d.rem_duration_minutes));
+    const awakeMin  = avg(filtered.map(d => d.awake_duration_minutes));
+    const inBedMin  = avg(filtered.map(d => d.in_bed_duration_minutes));
+
+    // card HH:MM
+    document.getElementById("moonTitle").innerHTML =
+        `<span class="animated-moon">${phase.emoji}</span> ${phase.name}`;
+
+    document.getElementById("nightsCount").textContent = filtered.length;
+    document.getElementById("inBed").textContent  = minutesToHHMM(inBedMin);
+    document.getElementById("asleep").textContent = minutesToHHMM(asleepMin);
+    document.getElementById("awake").textContent  = minutesToHHMM(awakeMin);
+    document.getElementById("light").textContent  = minutesToHHMM(lightMin);
+    document.getElementById("deep").textContent   = minutesToHHMM(deepMin);
+    document.getElementById("rem").textContent    = minutesToHHMM(remMin);
+   
+
+    // chart input = hours
+    const asleepH = asleepMin / 60;
+    const lightH  = lightMin  / 60;
+    const deepH   = deepMin   / 60;
+    const remH    = remMin    / 60;
+    const awakeH  = awakeMin  / 60;
+    const inBedH  = inBedMin  / 60;
+
+    if (radarChart) radarChart.destroy();
+
+    radarChart = new Chart(document.getElementById("radarChart"), {
+        type: "radar",
+        data: {
+            labels: ["In Bed", "Asleep", "Awake", "Light", "Deep", "REM"],
+            datasets: [{
+                label: "Sleep in hours and minutes HH:MM",
+                data: [inBedH, asleepH, awakeH, lightH, deepH, remH],
+                backgroundColor: "rgba(165, 123, 255, 0.30)",
+                borderColor: "#a57bff",
+                borderWidth: 2,
+                pointBackgroundColor: "#fff",
+                pointRadius: 6
+            }]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+            maintainAspectRatio: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    suggestedMax: 10,
+                    pointLabels: {
+                        font: { size: 20 },
+                        color: "#fff"
+                    },
+                    grid: { color: "rgba(255,255,255,0.28)" },
+                    angleLines: { color: "rgba(255,255,255,0.2)" }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const mins = ctx.raw * 60;
+                            const h = String(Math.floor(mins / 60)).padStart(2, "0");
+                            const m = String(Math.round(mins % 60)).padStart(2, "0");
+                            return `${ctx.label}: ${h}:${m}`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: "#fff",
+                    anchor: "end",
+                    align: "start",
+                    font: { size: 16, weight: "600" },
+                    formatter: v => {
+                        const mins = v * 60;
+                        const h = String(Math.floor(mins / 60)).padStart(2, "0");
+                        const m = String(Math.round(mins % 60)).padStart(2, "0");
+                        return `${h}:${m}`;
+                    }
+                },
+                legend: {
+                    labels: { color: "white", font: { size: 18 } }
+                }
+            }
+        }
+    });
+
+    const glowColors = [
+        "#24004a","#3f0077","#5a00ff","#7e2bff",
+        "#9d4bff","#7e2bff","#5a00ff","#3f0077"
+    ];
+    document.getElementById("moon_glow").style.backgroundColor = glowColors[i];
+}
+</script>
+
+</body>
+</html>
