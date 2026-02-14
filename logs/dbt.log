@@ -1,0 +1,16 @@
+[0m23:10:23.204566 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10af40800>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a8579b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b5c2630>]}
+
+
+============================== 23:10:23.207012 | d4f833b7-5917-4f6e-ba7a-2b46b0d3b876 ==============================
+[0m23:10:23.207012 [info ] [MainThread]: Running with dbt=1.11.2
+[0m23:10:23.207278 [debug] [MainThread]: running dbt with arguments {'log_cache_events': 'False', 'no_print': 'None', 'cache_selected_only': 'False', 'empty': 'False', 'send_anonymous_usage_stats': 'True', 'warn_error': 'None', 'static_parser': 'True', 'partial_parse': 'True', 'use_colors': 'True', 'debug': 'False', 'introspect': 'True', 'write_json': 'True', 'profiles_dir': '/Users/maxspaeth/.dbt', 'log_path': 'logs', 'fail_fast': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'target_path': 'None', 'version_check': 'True', 'quiet': 'False', 'invocation_command': 'dbt run --select staging.* --target source', 'log_format': 'default', 'printer_width': '80'}
+[0m23:10:23.207556 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/maxspaeth/Library/CloudStorage/OneDrive-sevdeskGmbH/sport_analytics/sport_analytics/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m23:10:23.208833 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.046396334, "process_in_blocks": "0", "process_kernel_time": 0.123289, "process_mem_max_rss": "110542848", "process_out_blocks": "0", "process_user_time": 0.621422}
+[0m23:10:23.209054 [debug] [MainThread]: Command `dbt run` failed at 23:10:23.209011 after 0.05 seconds
+[0m23:10:23.209204 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10afdc860>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b55f080>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b5c29c0>]}
+[0m23:10:23.209344 [debug] [MainThread]: Flushing usage events
+[0m23:10:23.800581 [debug] [MainThread]: An error was encountered while trying to flush usage events

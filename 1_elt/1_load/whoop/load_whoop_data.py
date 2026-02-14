@@ -12,8 +12,8 @@ from pathlib import Path
 from datetime import datetime
 import re
 
-# Get project root directory (3 levels up from this script)
-project_root = Path(__file__).parent.parent.parent
+# Get project root directory (4 levels up: whoop -> 1_load -> 1_elt -> project_root)
+project_root = Path(__file__).parent.parent.parent.parent
 data_dir = project_root / "0_data" / "raw" / "whoop"
 db_dir = project_root / "0_data" / "database"
 db_path = db_dir / "source.duckdb"

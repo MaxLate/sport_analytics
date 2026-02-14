@@ -173,7 +173,8 @@ class WhoopClient:
             import sys
             from pathlib import Path
 
-            sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+            # Add project root to path (4 levels up: whoop -> 0_extract -> 1_elt -> project_root)
+            sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
             from config_loader import Config
 
             self._config = Config()

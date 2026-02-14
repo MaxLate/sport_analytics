@@ -9,10 +9,14 @@ from datetime import datetime
 from pathlib import Path
 import sys
 
-# Add project root to path to import modules
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add project root to path to import modules (4 levels up: strava -> 0_extract -> 1_elt -> project_root)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 from config_loader import Config
-from strava.strava_client import StravaClient
+
+# Import from same directory
+sys.path.insert(0, str(Path(__file__).parent))
+from strava_client import StravaClient
 
 
 def ensure_directories(config):

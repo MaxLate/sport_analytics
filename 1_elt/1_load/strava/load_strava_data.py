@@ -14,13 +14,11 @@ from datetime import datetime
 import re
 import sys
 
-# Add project root to path to import modules
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add project root to path to import modules (4 levels up: strava -> 1_load -> 1_elt -> project_root)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 from config_loader import Config
 
-
-# Get project root directory (3 levels up from this script)
-project_root = Path(__file__).parent.parent.parent
 data_dir = project_root / "0_data" / "raw" / "strava"
 db_dir = project_root / "0_data" / "database"
 db_path = db_dir / "source.duckdb"
@@ -144,7 +142,7 @@ def load_to_duckdb(activities, config):
     """
     # Ensure database directory exists
     # Use source.duckdb for the new multi-database structure
-    project_root = Path(__file__).parent.parent.parent
+    project_root = Path(__file__).parent.parent.parent.parent
     db_path = project_root / "0_data" / "database" / "source.duckdb"
     db_path.parent.mkdir(parents=True, exist_ok=True)
 

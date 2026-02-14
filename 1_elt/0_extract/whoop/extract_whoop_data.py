@@ -8,16 +8,14 @@ import json
 import sys
 from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add project root to path (4 levels up: whoop -> 0_extract -> 1_elt -> project_root)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 from config_loader import Config
 from whoop import WhoopClient
 
 config = Config()
 start_date = "2025-01-01 00:00:00.000000"
-
-# Get project root directory (3 levels up from this script)
-project_root = Path(__file__).parent.parent.parent
 
 # Set database path in 0_data/raw/whoop folder
 db_dir = project_root / "0_data" / "raw" / "whoop"

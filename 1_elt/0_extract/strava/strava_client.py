@@ -9,8 +9,8 @@ from datetime import datetime
 import sys
 from pathlib import Path
 
-# Add project root to path to import config_loader
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add project root to path to import config_loader (4 levels up: strava -> 0_extract -> 1_elt -> project_root)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from config_loader import Config
 
 
