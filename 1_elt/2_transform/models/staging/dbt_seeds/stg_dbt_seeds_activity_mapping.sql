@@ -8,7 +8,7 @@ final as (
 
     select
 
-        "activity_name" :: varchar as activity_name,
+        "activity_name" :: varchar as original_activity_name,
         "aligned_activity_name" :: varchar as aligned_activity_name,
         "is_sport_exercise" :: boolean as is_sport_exercise
 

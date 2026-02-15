@@ -66,7 +66,7 @@ final as (
         activity_mapping_data.is_sport_exercise as is_sport_exercise
 
     from enhanced
-    left join activity_mapping_data on enhanced.whoop_activity_name = activity_mapping_data.aligned_activity_name
+    left join activity_mapping_data on enhanced.whoop_activity_name = activity_mapping_data.original_activity_name
 )
 
 select * from final
