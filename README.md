@@ -1,6 +1,9 @@
-# Sport Analytics
+# Sport Analytics - 2026 (Whoop & Strava)
 
-An end-to-end data pipeline project that extracts, transforms, and analyzes fitness data from Strava and Whoop APIs. This project demonstrates a complete ELT (Extract, Load, Transform) workflow using modern data engineering tools, with interactive analytics dashboards and natural language query capabilities.
+**Important Note**: This project is still WORK IN PROGRESS and will be updated and enhanced most of the time. For more details, see ToDos below.
+Since this project should also be used as a portfolio project for my career as Analytics Engineer, the focus lies on the end-to-end data pipeline. So for transparency, there are some parts which are hardcoded, especially all HTML and CSS parts.
+
+**Intro**: An end-to-end data pipeline project that extracts, transforms, and analyzes fitness data from Strava and Whoop APIs. This project demonstrates a complete ELT (Extract, Load, Transform) workflow using modern data engineering tools, with interactive analytics dashboards and an MVP for natural language query capabilities.
 
 ## 🎯 Overview
 
@@ -8,7 +11,14 @@ This repository serves as a learning and experimentation platform for data engin
 - **API Integration**: Automated data extraction from Strava and Whoop
 - **Data Transformation**: Multi-stage dbt pipeline with staging, intermediate, and metrics layers
 - **Analytics Applications**: Interactive dashboards and natural language query interfaces
-- **Modern Tech Stack**: DuckDB, dbt, FastAPI, and more
+- **Tech Stack**: DuckDB, dbt, FastAPI, and more
+
+
+## ToDos:
+- **Alerting and Testing**: Set up a much better Testing and Alerting Setup via Slack. 
+- **Orchestration**: Set up all python scripts and dbt runs by Airflow
+- **Docker**: Dockerize the whole project
+
 
 ## 🏗️ Architecture
 
