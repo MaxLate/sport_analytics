@@ -5,6 +5,8 @@ Since this project should also be used as a portfolio project for my career as A
 
 **Intro**: An end-to-end data pipeline project that extracts, transforms, and analyzes fitness data from Strava and Whoop APIs. This project demonstrates a complete ELT (Extract, Load, Transform) workflow using modern data engineering tools, with interactive analytics dashboards and an MVP for natural language query capabilities.
 
+![Text-to-SQL-Solution](Text-to-SQL%20Solution.png)
+
 ## 🎯 Overview
 
 This repository serves as a learning and experimentation platform for data engineering, combining:
