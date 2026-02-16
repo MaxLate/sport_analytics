@@ -11,9 +11,6 @@ models:
         tests:
           - unique
           - not_null
-          - relationships:
-              to: ref('int_whoop_physiological_cycles')
-              field: sleep_id
 
       - name: sleep_id_of_day
         description: Unique identifier for the sleep event within the day, calculated using row_number() partitioned by day.
@@ -24,6 +21,9 @@ models:
         description: 'Date of the sleep episode, calculated with logic to handle sleep that starts after midnight (subtracts 1 day if sleep onset is before 12:00 and not a nap). {{ doc("date_day") }}'
         tests:
           - not_null
+          - relationships:
+              to: ref('stg_dbt_seeds_moon_data')
+              field: date_day
 
       - name: sleep_start_date
         description: Date of the sleep start, calculated using date_trunc on sleep_onset.
