@@ -92,7 +92,11 @@ sport_analytics/
 │       ├── models/
 │       │   ├── staging/     # Staging models (views)
 │       │   ├── intermediate/ # Intermediate models (tables)
-│       │   └── metrics/     # Final metrics (tables)
+│       │   └── metrics/     # Final metrics (facts & dimensions)
+│       │       ├── dates/   # Date dimension
+│       │       ├── semantic/ # Unified / semantic layer
+│       │       ├── strava/  # Strava facts & dimensions
+│       │       └── whoop/   # Whoop facts & dimensions
 │       ├── seeds/           # CSV seed files
 │       └── macros/          # Custom dbt macros
 │
@@ -265,13 +269,11 @@ For more details, see [`2_analytics/sleep_analytics/how_to_run.txt`](2_analytics
 - `whoop.int_whoop_workouts`
 
 **Metrics Layer** (`analytics.duckdb`):
-- `strava.fct_strava_activities`
-- `strava.fct_strava_activities_socials`
-- `whoop.fct_whoop_sleeps`
-- `whoop.fct_whoop_sleep_quality`
-- `whoop.fct_whoop_workouts`
-- `semantic.fct_activities` (unified activities table)
-- `dates.dim_dates` (date dimension table)
+
+- **Strava**: `fct_strava_activities`, `fct_strava_activities_socials`, `dim_strava_activity_type`, `dim_strava_gear`
+- **Whoop**: `fct_whoop_sleeps`, `fct_whoop_sleep_quality`, `fct_whoop_workouts`, `dim_whoop_workouts`
+- **Semantic**: `fct_activities` (unified activities), `data_check` (data availability per date)
+- **Dates**: `dim_dates` (date dimension)
 
 ## 🧪 Testing
 
