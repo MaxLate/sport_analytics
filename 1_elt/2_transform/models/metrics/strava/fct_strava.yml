@@ -42,8 +42,9 @@ models:
       Fact table containing social engagement metrics and activity metadata/settings for Strava activities.
       This table focuses on the social aspects and characteristics of activities rather than physical performance.
       Second fact table (same grain as fct_strava_activities). Join on strava_activity_id.
+      **Foreign keys:** date_day -> dim_dates, strava_activity_type_id -> dim_strava_activity_type, strava_gear_id -> dim_strava_gear.
+      **Degenerate dimensions:** strava_activity_id, strava_activity_id_of_day, name; flags: trainer, commute, manual, private, flagged.
       **Measures:** achievement_count, kudos_count, comment_count, athlete_count.
-      **Flags/context:** trainer, commute, manual, private, flagged, gear_id.
 
       **Contains:**
       - **Activity identifiers**: strava_activity_id, strava_activity_id_of_day, date_day (shared with fct_strava_activities for joins)
@@ -58,7 +59,7 @@ models:
         - manual: Boolean flag indicating if activity was manually created (not uploaded from device)
         - private: Boolean flag indicating if activity visibility is set to private
         - flagged: Boolean flag indicating if activity has been flagged for review
-        - gear_id: Identifier linking to the gear/equipment used (e.g., bike ID, shoe ID)
+      - **Gear:** Join to dim_strava_gear via strava_gear_id for equipment used (e.g., bike, shoes)
       
       **Use this table when you need:**
       - Social engagement analysis (kudos, comments, achievements)
