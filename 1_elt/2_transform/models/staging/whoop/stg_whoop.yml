@@ -113,6 +113,35 @@ models:
             data_tests:
               - accepted_values:
                   values: [true, false]
+
+          - name: whoop_activity_name
+            description: name of the activity as reported by WHOOP
+            data_tests:
+              - not_null
+              - accepted_values:
+                  values: [
+                    "powerlifting",
+                    "sauna",
+                    "watching-sports",
+                    "hiking-rucking",
+                    "sculpt-yoga",
+                    "padel",
+                    "swimming",
+                    "increase_relaxation",
+                    "dog-walking",
+                    "hiit",
+                    "activity",
+                    "dance",
+                    "ski-touring",
+                    "commuting",
+                    "yoga",
+                    "badminton",
+                    "running",
+                    "walking",
+                    "weightlifting",
+                    "table-tennis",
+                    "cycling"
+                  ]
   
       - name: stg_whoop_physiological_cycles
         description: "Staging table containing WHOOP physiological cycle metrics, combining Cycle, Recovery, and SleepScore measurements per physiological cycle. See [Cycle](https://developer.whoop.com/docs/developing/user-data/cycle), [Recovery](https://developer.whoop.com/docs/developing/user-data/recovery), and [Sleep](https://developer.whoop.com/docs/developing/user-data/sleep)."

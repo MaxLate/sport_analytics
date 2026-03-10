@@ -30,6 +30,20 @@ models:
         description: "Legacy activity type classification (e.g. Run, Ride), corresponding to the `type` field. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
         data_tests:
           - not_null
+          - accepted_values:
+                  values: [ 
+                    "Ride",
+                    "Racquetball",
+                    "NordicSki",
+                    "Workout",
+                    "WeightTraining",
+                    "HighIntensityIntervalTraining",
+                    "Crossfit",
+                    "Hike",
+                    "Yoga",
+                    "Run",
+                    "Swim"
+                    ]
 
       - name: sport_type
         description: "Sport-specific activity type (e.g. Run, MountainBikeRide, Ride), corresponding to the `sport_type` field used in create/get activity endpoints. Source: Strava Activities API v3 – https://developers.strava.com/docs/reference/#api-Activities."
