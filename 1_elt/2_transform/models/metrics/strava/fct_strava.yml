@@ -1,8 +1,16 @@
+# Kimball star schema: fact + dimension
+# Grain: one row per Strava activity
+# Join to dim_dates on date_day, to dim_strava_activity_type on strava_activity_type_id
 models:
   - name: fct_strava_activities
     description: |
       Fact table containing core performance and physical metrics for Strava activities. 
       This is the primary table for analyzing athletic performance data.
+      
+      **Foreign keys:** date_day -> dim_dates, strava_activity_type_id -> dim_strava_activity_type.
+      **Degenerate dimensions:** strava_activity_id, strava_activity_id_of_day, name.
+      **Measures:** distance, moving/elapsed time, elevation, speed, heart rate, power, cadence, coordinates.
+      Use with dim_strava_activity_type for activity_name / is_sport_exercise; with dim_dates for calendar attributes.
       
       **Contains:**
       - **Activity identifiers**: strava_activity_id, strava_activity_id_of_day, date_day for temporal analysis
@@ -33,7 +41,10 @@ models:
     description: |
       Fact table containing social engagement metrics and activity metadata/settings for Strava activities.
       This table focuses on the social aspects and characteristics of activities rather than physical performance.
-      
+      Second fact table (same grain as fct_strava_activities). Join on strava_activity_id.
+      **Measures:** achievement_count, kudos_count, comment_count, athlete_count.
+      **Flags/context:** trainer, commute, manual, private, flagged, gear_id.
+
       **Contains:**
       - **Activity identifiers**: strava_activity_id, strava_activity_id_of_day, date_day (shared with fct_strava_activities for joins)
       - **Social engagement metrics**:

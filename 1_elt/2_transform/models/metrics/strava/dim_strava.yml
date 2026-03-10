@@ -1,0 +1,28 @@
+# Kimball dimensions for Strava facts
+models:
+  - name: dim_strava_activity_type
+    description: |
+      Dimension table containing distinct activity types for Strava activities (Kimball dimension).
+      One row per unique combination of type, activity_name, and is_sport_exercise.
+      Use for filtering or grouping fct_strava_activities by activity type.
+    materialized: table
+    columns:
+      - name: strava_activity_type_id
+        description: Surrogate key for the activity type dimension.
+      - name: type
+        description: Raw Strava type from API (e.g. Run, Ride).
+      - name: activity_name
+        description: Aligned activity name from seed mapping.
+      - name: is_sport_exercise
+        description: Whether the activity is classified as sport/exercise.
+
+  - name: dim_strava_gear
+    description: |
+      Dimension table of distinct gear (bikes, shoes, etc.) from Strava activities.
+      One row per gear_id; join to fct_strava_activities via strava_gear_id.
+    materialized: table
+    columns:
+      - name: strava_gear_id
+        description: Surrogate key for the gear dimension.
+      - name: gear_id
+        description: Strava API gear identifier (e.g. bike or shoe id).

@@ -21,7 +21,7 @@ models:
       
       **Relationship to Other Tables:**
       - **Source**: Aggregates data from `fct_strava_activities` (which contains detailed performance metrics)
-      - **Join key**: Use `strava_activity_id` to join with other fact tables (e.g., `fct_strava_activities_socials`) or dimension tables
+      - **Join key**: Use `strava_activity_id` to join with dimension tables; social metrics and gear are in `fct_strava_activities` (join `dim_strava_gear` for gear_id).
       - **Temporal joins**: Use `date_day` to join with date dimension tables or other time-series data
       
       **Query Examples:**
